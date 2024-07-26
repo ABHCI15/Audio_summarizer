@@ -2,5 +2,4 @@ streamlit
 google-generativeai
 pytubefix
 whisper
-soundfile
 tempfile
