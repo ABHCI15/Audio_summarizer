@@ -26,30 +26,11 @@ summarize_gem = st.button("Summarize with Gemini")
 download_mp3 = st.button("Download MP3")
 download_mp4 = st.button("Download MP4")
 
-@st.cache_data
-def summarizeGem():
-    if file is not None:
-        with st.spinner("Processing..."):
-            with NamedTemporaryFile(suffix=".mp3") as temp:
-                temp.write(file.getvalue())
-                temp.seek(0)
-                # st.write(temp.name)
-                model = gemini.GenerativeModel(model_name="gemini-1.5-pro")
-                data = gemini.upload_file(path=temp.name)
-                prompt = "generate a thorough summary with notes of this audio file"
-                response = model.generate_content([prompt, data])
-                return response.text
-    if yt_url:
-        with st.spinner("Processing..."):
-            yt = YouTube(yt_url)
-            st.write(yt.title)
-            ys = yt.streams.get_highest_resolution()
-            ys.download(mp3=True,filename="audio")
-            model = gemini.GenerativeModel(model_name="gemini-1.5-pro-exp-0801", generation_config=gemini.GenerationConfig(max_output_tokens=8192))
-            data = gemini.upload_file(path="audio.mp3")
-            prompt = "Write thorough notes with excellent detail and attention, similar to how a student would in a condensed manner such that the reader remembers everything from the audio, include every important section. You have access to over 8000 tokens in output tokens, use them all if necessary."
-            response = model.generate_content([prompt, data])
-            return response.text
+def streamer(response):
+    for chunk in response:
+        yield chunk.text
+
+
 
 if download_mp3:
     if yt_url:
@@ -132,8 +113,28 @@ if engem_tc:
             st.write(response.text)
 
 if summarize_gem:
-   result = summarizeGem()
-   st.write(result)
+    if file is not None:
+        with st.spinner("Processing..."):
+            with NamedTemporaryFile(suffix=".mp3") as temp:
+                temp.write(file.getvalue())
+                temp.seek(0)
+                # st.write(temp.name)
+                model = gemini.GenerativeModel(model_name="gemini-1.5-pro")
+                data = gemini.upload_file(path=temp.name)
+                prompt = "generate a thorough summary with notes of this audio file"
+                response = model.generate_content([prompt, data])
+                st.write(response.text)
+    if yt_url:
+        with st.spinner("Processing..."):
+            yt = YouTube(yt_url)
+            st.write(yt.title)
+            ys = yt.streams.get_highest_resolution()
+            ys.download(mp3=True,filename="audio")
+            model = gemini.GenerativeModel(model_name="gemini-1.5-pro-exp-0801", generation_config=gemini.GenerationConfig(max_output_tokens=8192))
+            data = gemini.upload_file(path="audio.mp3")
+            prompt = "Write thorough notes with excellent detail and attention, similar to how a student would in a condensed manner such that the reader remembers everything from the audio, include every important section. You have access to over 8000 tokens in output tokens, use them all if necessary."
+            response = model.generate_content([prompt, data], stream=True)
+            st.write_stream(streamer(response))
 
 if summarize_wh:
     if file is not None:
