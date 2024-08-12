@@ -5,7 +5,9 @@ from pytubefix import YouTube
 import whisper
 import soundfile as sf
 from tempfile import NamedTemporaryFile
+from pytube.innertube import _default_clients
 
+_default_clients["ANDROID_MUSIC"] = _default_clients["WEB"]
 gemini.configure(api_key=st.secrets["api_key"])
 # model = gemini.GenerativeModel(model_name="gemini-1.5-pro")
 # data = gemini.upload_file(path='test.mp3')
@@ -126,8 +128,10 @@ if summarize_gem:
                 st.write(response.text)
     if yt_url:
         with st.spinner("Processing..."):
-            yt = YouTube(yt_url)
-            st.write(yt.title)
+            try:
+                yt = YouTube(yt_url)
+            except:
+                yt = YouTube(yt_url,use_oauth=True, allow_oauth_cache=True)
             ys = yt.streams.get_highest_resolution()
             ys.download(mp3=True,filename="audio")
             model = gemini.GenerativeModel(model_name="gemini-1.5-pro-exp-0801", generation_config=gemini.GenerationConfig(max_output_tokens=8192))
