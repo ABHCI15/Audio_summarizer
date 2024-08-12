@@ -130,10 +130,12 @@ if summarize_gem:
         with st.spinner("Processing..."):
             try:
                 yt = YouTube(yt_url)
+                ys = yt.streams.get_highest_resolution()
+                ys.download(mp3=True,filename="audio")
             except:
                 yt = YouTube(yt_url,use_oauth=True, allow_oauth_cache=True)
-            ys = yt.streams.get_highest_resolution()
-            ys.download(mp3=True,filename="audio")
+                ys = yt.streams.get_highest_resolution()
+                ys.download(mp3=True,filename="audio")
             model = gemini.GenerativeModel(model_name="gemini-1.5-pro-exp-0801", generation_config=gemini.GenerationConfig(max_output_tokens=8192))
             data = gemini.upload_file(path="audio.mp3")
             prompt = "Write thorough notes with excellent detail and attention, similar to how a student would in a condensed manner such that the reader remembers everything from the audio, include every important section. You have access to over 8000 tokens in output tokens, use them all if necessary."
