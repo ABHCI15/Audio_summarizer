@@ -5,7 +5,7 @@ from pytubefix import YouTube
 import whisper
 import soundfile as sf
 from tempfile import NamedTemporaryFile
-from pytube.innertube import _default_clients
+from pytubefix.innertube import _default_clients
 
 _default_clients["ANDROID_MUSIC"] = _default_clients["WEB"]
 gemini.configure(api_key=st.secrets["api_key"])
